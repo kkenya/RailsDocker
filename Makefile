@@ -13,7 +13,7 @@ init:
 build:
 	docker-compose build
 
-# サーバーを起動する
+# アプリケーションを起動する
 .PHONY: up
 up:
 	rm -rf tmp/pids/server.pid
@@ -38,21 +38,6 @@ down:
 .PHONY: ps
 ps:
 	docker-compose ps
-
-# ターゲット名が引数に含まれていた場合エラー　'make run foo bar run'
-# すでに定義されているターゲット名が引数に含まれていた場合実行してしまう
-# echo:
-# 	@echo $(filter-out $@, $(MAKECMDGOALS))
-# %:
-# 	@true
-# # すでに定義されているターゲット名が引数に含まれていた場合overriteしてしまう
-# ifeq (filter, $(firstword $(MAKECMDGOALS)))
-#   runargs := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
-#   $(eval $(runargs):;@true)
-# endif
-# 
-# filter:
-# 	@echo $(runargs)
 
 # railsのメソッドを実行する(e.g. make rails db:migrate)
 rails:
