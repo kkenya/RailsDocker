@@ -1,8 +1,7 @@
 FROM ruby:2.5.0
+LABEL maintainer="@kkenya"
 
 ENV APP_ROOT /rails_app
-
-WORKDIR $APP_ROOT
 
 RUN apt-get update -qq && \
     apt-get install -y nodejs \
@@ -10,16 +9,12 @@ RUN apt-get update -qq && \
                        --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Gemfile $APP_ROOT
-COPY Gemfile.lock $APP_ROOT
+# /tmp配下のファイルに変更がない限りbundle installを実行しない
+WORKDIR /tmp
+COPY Gemfile Gemfile
+COPY Gemfile.lock Gemfile.lock
 
-RUN \
-  echo 'gem: --no-document' >> ~/.gemrc && \
-  cp ~/.gemrc /etc/gemrc && \
-  chmod uog+r /etc/gemrc && \
-  bundle config --global build.nokogiri --use-system-libraries && \
-  bundle config --global jobs 4 && \
-  bundle install && \
-  rm -rf ~/.gem
+RUN   bundle install
 
+WORKDIR $APP_ROOT
 COPY . $APP_ROOT

@@ -5,32 +5,45 @@ init:
 	sed -i '' 's/^# gem/gem/' Gemfile
 	touch Gemfile.lock
 	docker-compose run app rails new . --force --database=mysql --skip-bundle --skip-git
-	# config/database.yml passwordとhostを変更する
+	cp -f template/database.yml config/database.yml
+	cp .env.dev.sample .env.dev
 
-# サーバーを起動する
+# イメージを構築する
+.PHONY: build
+build:
+	docker-compose build
+
+# アプリケーションを起動する
 .PHONY: up
 up:
 	rm -rf tmp/pids/server.pid
 	docker-compose up
 
-# method1
-# ターゲット名が引数に含まれていた場合エラー　'make run foo bar run'
-# すでに定義されているターゲット名が引数に含まれていた場合実行してしまう
-echo:
-	@echo ./prog $(filter-out $@, $(MAKECMDGOALS))
-%:
-	@true
+# アプリケーションを再起動する
+.PHONY: restart
+restart:
+	docker-compose restart
 
-# method2
-# すでに定義されているターゲット名が引数に含まれていた場合overriteしてしまう
-ifeq (filter, $(firstword $(MAKECMDGOALS)))
-  runargs := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
-  $(eval $(runargs):;@true)
-endif
+# ログを出力する
+.PHONY: logs
+logs:
+	docker-compose logs
 
-filter:
-	@echo $(runargs)
+# アプリケーションを終了する
+.PHONY: down
+down:
+	docker-compose down
+
+# コンテナの一覧
+.PHONY: ps
+ps:
+	docker-compose ps
 
 # railsのメソッドを実行する(e.g. make rails db:migrate)
 rails:
 	docker-compose run app rails $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+
+# docker: 停止しているコンテナをすべて削除する
+.PHONY: clean
+clean:
+	docker rm `docker ps -f "status=exited" -q`

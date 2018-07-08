@@ -32,3 +32,5 @@
 # macOS dotfile
 .DS_Store
 
+# environment variables
+.env.dev
